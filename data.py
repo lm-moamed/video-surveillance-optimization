@@ -4,6 +4,7 @@ from pathlib import Path
 def create_database(database_file):
     # Check if the database file already exists
     if not Path(database_file).is_file():
+        print('creating the DataBase')
         # Create a connection to the database (this will create the file if it doesn't exist)
         conn = sqlite3.connect(database_file)
         cursor = conn.cursor()

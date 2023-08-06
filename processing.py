@@ -85,8 +85,6 @@ def get_path_for_record(basePath, user_foldername, stream_foldername, strmID):
 
 def process(strmID, DBfile, basePath, mask_path=None, p_fps=0) :
     user_foldername, stream_foldername, rtsp_url,_ = get_data_by_strm(DBfile,strmID)
-    # timestamp = time.strftime("%Y%m%d_%H%M%S")
-    # rtsp_url = get_path_for_record()
     mask = None
     cap = cv2.VideoCapture(rtsp_url)
     frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
@@ -102,3 +100,4 @@ def process(strmID, DBfile, basePath, mask_path=None, p_fps=0) :
         out = cv2.VideoWriter(output_file, fourcc, fps, (frame_width, frame_height), isColor=True)
         basic_process(cap=cap,frame_skip=frame_skip,fps=fps,out=out,tperd=1,mask=None)
         DatabaseManp(DBfile).insert_record(output_file,strmID,current_datetime)
+        print("new record at ",output_file)
