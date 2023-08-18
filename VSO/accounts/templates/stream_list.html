@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block dates %}
+<div class="container">
+    {{ block.super }}
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <h1 class="mb-4">Streams</h1>
+            <ul class="list-group">
+                {% for stream in streams %}
+                    <li class="list-group-item">
+                        <a href="{% url 'records' chosen_date stream.id %}" class="text-decoration-none">{{ stream.label }}</a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}
