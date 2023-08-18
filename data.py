@@ -26,7 +26,7 @@ def create_database(database_file):
                 userid INTEGER NOT NULL,
                 foldername TEXT NOT NULL,
                 status TEXT NOT NULL,
-                processing INTEGER  DEFAULT 0,
+                is_processing INTEGER  DEFAULT 0,
                 FOREIGN KEY (userid) REFERENCES users(id)
             );
         ''')
@@ -70,9 +70,9 @@ class DatabaseManp:
         cursor.execute("INSERT INTO streams (url, userid, foldername, status) VALUES (?, ?, ?, ?)", (url, userid, foldername, status))
         self.conn.commit()
 
-    def insert_record(self, path, streamid, recorddate):
+    def insert_record(self, path, streamid, recorddate, userid):
         cursor = self.conn.cursor()
-        cursor.execute("INSERT INTO records (path, streamid, recorddate) VALUES (?, ?, ?)", (path, streamid, recorddate))
+        cursor.execute("INSERT INTO accounts_record (path, streamid_id, created_at, userid_id) VALUES (?, ?, ?, ?)", (path, streamid, recorddate, userid))
         self.conn.commit()
 
     def update_user_phone(self, user_id, new_phone_number):
@@ -103,7 +103,7 @@ class DatabaseManp:
 
     def get_actif_streams(self):
         cursor = self.conn.cursor()
-        cursor.execute("select id from streams where status =\'actif\'")
+        cursor.execute("select id from accounts_stream where status = 1")
         streams = cursor.fetchall()
         return streams
 
@@ -123,9 +123,9 @@ class DatabaseManp:
 
         cursor = self.conn.cursor()
         cursor.execute('''
-            SELECT u.foldername AS user_foldername, s.foldername AS stream_foldername, s.url, s.status
-            FROM streams s
-            INNER JOIN users u ON s.userid = u.id
+            SELECT u.id, u.first_name , s.label , s.url, s.status, s.period
+            FROM accounts_stream s
+            INNER JOIN auth_user u ON s.userid_id = u.id
             WHERE s.id = ?
         ''', str(stream_id))
 
@@ -135,21 +135,21 @@ class DatabaseManp:
         cursor = self.conn.cursor()
         cursor.execute('''
                        SELECT id
-                       FROM streams
-                       WHERE processing = 0
+                       FROM accounts_stream
+                       WHERE is_processing = 0 and status = 1
                    ''')
         return  cursor.fetchall()
 
 
 
-    def set_stream_processing(self, stream_id, processing):
+    def set_stream_processing(self, stream_id, is_processing):
         cursor = self.conn.cursor()
 
         cursor.execute('''
-            UPDATE streams
-            SET processing = ?
+            UPDATE accounts_stream
+            SET is_processing = ?
             WHERE id = ?
-        ''', (processing, str(stream_id)))
+        ''', (is_processing, str(stream_id)))
 
         # Commit the changes and close the connection
         self.conn.commit()

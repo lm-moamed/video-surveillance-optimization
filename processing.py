@@ -77,14 +77,15 @@ def get_path_for_record(basePath, user_foldername, stream_foldername, strmID):
     # Create the necessary folders if they don't exist
     create_missing_folders(base_path)
 
-    record_filename = f'record_{strmID}_{datetime.now().strftime("%H%M%S")}.mp4'
+    record_filename = f'record_{strmID}_{datetime.now().strftime("%H%M%S")}.webm'
     record_path = os.path.join(base_path, record_filename)
 
     return record_path
 
 
 def process(strmID, DBfile, basePath, mask_path=None, p_fps=0) :
-    user_foldername, stream_foldername, rtsp_url,_ = get_data_by_strm(DBfile,strmID)
+    usid, fn, stream_label, rtsp_url,_,period = get_data_by_strm(DBfile,strmID)
+    user_foldername = f"user_{usid}_{fn}"
     mask = None
     cap = cv2.VideoCapture(rtsp_url)
     frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
@@ -93,11 +94,11 @@ def process(strmID, DBfile, basePath, mask_path=None, p_fps=0) :
     frame_skip = pro_step(fps, p_fps)
     if mask_path:
         mask = cv2.imread(mask_path)
-    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+    fourcc = cv2.VideoWriter_fourcc(*'VP90')
     while True:
         current_datetime = datetime.now()
-        output_file = get_path_for_record(basePath,user_foldername,stream_foldername,strmID)
+        output_file = get_path_for_record(basePath,user_foldername,stream_label,strmID)
         out = cv2.VideoWriter(output_file, fourcc, fps, (frame_width, frame_height), isColor=True)
-        basic_process(cap=cap,frame_skip=frame_skip,fps=fps,out=out,tperd=1,mask=None)
-        DatabaseManp(DBfile).insert_record(output_file,strmID,current_datetime)
+        basic_process(cap=cap, frame_skip=frame_skip, fps=fps, out=out, tperd=int(period), mask=None)
+        DatabaseManp(DBfile).insert_record(output_file,strmID,current_datetime,usid)
         print("new record at ",output_file)
