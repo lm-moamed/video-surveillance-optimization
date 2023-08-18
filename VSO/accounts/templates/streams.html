@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block dates %}
+<div class="container">
+    {{ block.super }}
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <h1 class="mb-4">Your Streams</h1>
+
+            <!-- List of streams -->
+            <ul class="list-group">
+                {% for stream in streams %}
+                    <li class="list-group-item">
+                        <a href="{% url 'stream_details' stream.id %}" class="text-decoration-none">{{ stream.label }}</a>
+                    </li>
+                {% endfor %}
+            </ul>
+
+            <!-- Stream details -->
+            {% if current_stream and details %}
+                <div class="mt-4">
+                    <h2>Stream Details</h2>
+                    <div class="card">
+                        <div class="card-body">
+                            <p><strong>Label:</strong> {{ current_stream.label }}</p>
+                            <p><strong>URL:</strong> {{ current_stream.url }}</p>
+                            <p><strong>Period:</strong> {{ current_stream.period }}</p>
+                            <!-- Display other details as needed -->
+                            <a href="{% url 'edit_stream' current_stream.id %}" class="btn btn-primary">Edit Stream</a>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Add new stream form -->
+            <div class="mt-4">
+                {% if show_add_form %}
+                    <h2>Add New Stream</h2>
+                    <form method="post" action="{% url 'add_stream' %}">
+                        {% csrf_token %}
+                        {{ add_form.as_p }}
+                        <button type="submit" class="btn btn-success">Add Stream</button>
+                    </form>
+                {% else %}
+                    <a href="{% url 'add_stream' %}" class="btn btn-success">Add New Stream</a>
+                {% endif %}
+            </div>
+
+            <!-- Edit stream form -->
+            <div class="mt-4">
+                {% if show_edit_form %}
+                    <h2>Edit Stream</h2>
+                    <form method="post" action="{% url 'edit_stream' current_stream.id %}">
+                        {% csrf_token %}
+                        {{ edit_form.as_p }}
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
